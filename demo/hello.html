@@ -1,0 +1,17 @@
+<body>
+	<canvas id = "canvas" style="background-color:black">
+		
+	</canvas>
+	<script>
+		onload = function()
+		{
+			var canvas = document.getElementById("canvas")
+			canvas.width = 500
+			canvas.height = 500
+
+			var gl = canvas.getContext("webgl")
+			gl.clearColor(0.0, 0.0, 0.0, 1.0)
+			gl.clear(gl.COLOR_BUFFER_BIT)
+		}
+	</script>
+</body>
