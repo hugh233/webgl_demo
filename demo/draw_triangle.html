@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="utf-8">
+	<title>Draw Triangle</title>
+	<script id="vs" type="x-shader/x-vertex">
+		attribute vec4 a_Position;
+		void main(void)
+		{
+			gl_PointSize = 20.0;
+			gl_Position = a_Position;
+		}
+	</script>
+
+	<script id="fs" type="x-shader/x-fragment">
+		void main(void)
+		{
+			gl_FragColor = vec4(1.0, 0.0, 0.0, 1.0);
+		}
+	</script>
+</head>
+<body>
+	<canvas id="canvas" style="background-color: black"></canvas>
+	<script >
+		onload = function()
+		{
+			var canvas = document.getElementById("canvas")
+			canvas.width = 500
+			canvas.height = 500
+
+			var gl = canvas.getContext("webgl")
+			gl.clearColor(0.0, 0.0, 0.0, 1.0)
+			gl.clearDepth(1.0)
+			gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
+
+			var v_shader = create_shader("vs")
+			var f_shader = create_shader("fs")
+			var program = create_program(v_shader, f_shader)
+
+			var a_Position = gl.getAttribLocation(program, "a_Position")
+
+			var vertices = new Float32Array(
+				[
+					0.0, 0.5,
+					-0.5, -0.5,
+					0.5, -0.5
+				])
+			var vertices_rect = new Float32Array(
+				[
+					-0.5, 0.5,
+					-0.5, -0.5,
+					0.5, 0.5,
+					0.5, -0.5,
+					0.6, 0
+				])
+			var n = 5
+			var vertexBuffer = gl.createBuffer()
+			if(!vertexBuffer)
+			{
+				console.log("Failed to create the buffer object")				
+			}
+			gl.bindBuffer(gl.ARRAY_BUFFER, vertexBuffer)
+			gl.bufferData(gl.ARRAY_BUFFER, vertices_rect, gl.STATIC_DRAW)
+			gl.vertexAttribPointer(a_Position, 2, gl.FLOAT, false, 0, 0)
+			gl.enableVertexAttribArray(a_Position)
+			gl.clearColor(0.0, 0.0, 0.0, 1.0)
+			gl.clear(gl.COLOR_BUFFER_BIT)
+			gl.drawArrays(gl.TRIANGLE_FAN, 0, n)
+
+
+			function create_program(v_shader, f_shader)
+			{
+				var program = gl.createProgram()
+				gl.attachShader(program, v_shader)
+				gl.attachShader(program, f_shader)
+				gl.linkProgram(program)
+				if(gl.getProgramParameter(program, gl.LINK_STATUS))
+				{
+
+					gl.useProgram(program)
+					return program
+				}else
+				{
+					console.log("create_program link error -> ", gl.getProgramInfoLog(program))
+				}
+			}
+
+			function create_shader(id)
+			{
+				var shader
+				var scriptElement = document.getElementById(id)
+				if(!scriptElement)
+				{
+					return
+				}
+				switch(scriptElement.type)
+				{
+					case "x-shader/x-vertex":
+						shader = gl.createShader(gl.VERTEX_SHADER)
+						break
+					case "x-shader/x-fragment":
+						shader = gl.createShader(gl.FRAGMENT_SHADER)
+						break
+					default:
+						return
+				}
+
+				gl.shaderSource(shader, scriptElement.text)
+				gl.compileShader(shader)
+				if(gl.getShaderParameter(shader, gl.COMPILE_STATUS))
+				{
+					return shader
+				}else
+				{
+					console.log("create_shader compile error -> ", gl.getShaderInfoLog(shader))
+				}
+			}
+		}
+	</script>
+</body>
+</html>

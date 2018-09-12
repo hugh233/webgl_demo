@@ -2,12 +2,13 @@
 <html lang="en">
 <head>
 	<meta charset="UTF-8">
-	<title>Draw Point</title>
+	<title>Draw Line</title>
 	<script id="vs" type="x-shader/x-vertex">
+		attribute vec4 a_Position;
 		void main(void)
 		{
 			gl_PointSize = 20.0;
-			gl_Position = vec4(0.0, 0.0, 0.0, 1.0);
+			gl_Position = a_Position;
 		}
 	</script>
 	<script id="fs" type="x-shader/x-fragment">
@@ -33,7 +34,32 @@
 		var v_shader = create_shader("vs")
 		var f_shader = create_shader("fs")
 		var program = create_program(v_shader, f_shader)
-		gl.drawArrays(gl.POINT, 0, 1)
+
+		var a_Position = gl.getAttribLocation(program, "a_Position")
+
+		var vertices = new Float32Array(
+			[
+				0.0, 0.5,
+				-0.5, -0.5,
+				0.5, -0.5
+			])
+
+		var n = 3
+
+		var vertexBuffer = gl.createBuffer()
+		if(!vertexBuffer)
+		{
+			console.error("Failed to create the buffer object")
+		}
+
+		gl.bindBuffer(gl.ARRAY_BUFFER, vertexBuffer)
+		gl.bufferData(gl.ARRAY_BUFFER, vertices, gl.STATIC_DRAW)
+		gl.vertexAttribPointer(a_Position, 2, gl.FLOAT, false, 0.0, 0)
+		gl.enableVertexAttribArray(a_Position)
+
+		gl.clearColor(0.0, 0.0, 0.0, 1.0)
+		gl.clear(gl.COLOR_BUFFER_BIT)
+		gl.drawArrays(gl.LINE_LOOP, 0, n)
 
 		function create_program(v_shader, f_shader)
 		{
@@ -42,14 +68,13 @@
 			gl.attachShader(program, f_shader)
 
 			gl.linkProgram(program)
-			// gl.useProgram(program)
 			if(gl.getProgramParameter(program, gl.LINK_STATUS))
 			{
 				gl.useProgram(program)
 				return program
 			}else
 			{
-				console.error(gl.getProgramInfoLog(program))
+				console.error("create_fragment error -> ", gl.getProgramInfoLog(program))
 			}
 		}
 
@@ -83,7 +108,7 @@
 				return shader
 			}else
 			{
-				console.error(gl.getShaderInfoLog(shader))
+				console.error("create_shader error -> ", gl.getShaderInfoLog(shader))
 			}
 		}
 
